@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f9ec0594-3f74-464a-90cb-7a6affe01c26" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="889344b9-3ebf-4685-9db1-289951aaa569" >
+		<db:my-sql-connection database="employeedetails" host="${DB.host}" port="${DB.port}" user="${secure::DB.username}" password="${secure::DB.password}"/>
+	</db:config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="035e3541-a40d-4581-a294-1e0bd4c2db99" file="DATA-Dev.properties" key="abcdefghijklmnop" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="6dc71a62-07f6-484b-ae7c-fd7ce862c34b" file="DATA-Dev.properties" />
+	<flow name="RetriveAccount" doc:id="a29233c3-0b27-4dcd-befc-7f7e2cd671e9" >
+		<http:listener doc:name="Listener" doc:id="ea0d3fc8-570b-49ba-8fc3-bfe1d4bd7d19" config-ref="HTTP_Listener_config" path="/DATA"/>
+		<db:select doc:id="0d6ca772-b713-4755-a970-a18d0f55cf77" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from account where accountId=:accID;	]]></db:sql>
+			<db:input-parameters ><![CDATA[#[accID:attributes.queryParams.accountId]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="1a284a73-5a37-4b12-b283-cd3b557663ab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c6de232d-8e59-4725-ae3c-8e2cd4c8d080" message="response received from db------#[payload]"/>
+	</flow>
+</mule>
