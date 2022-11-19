@@ -19,6 +19,7 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 	<configuration-properties doc:name="Configuration properties" doc:id="6dc71a62-07f6-484b-ae7c-fd7ce862c34b" file="DATA-Dev.properties" />
 	<flow name="RetriveAccount" doc:id="a29233c3-0b27-4dcd-befc-7f7e2cd671e9" >
 		<http:listener doc:name="Listener" doc:id="ea0d3fc8-570b-49ba-8fc3-bfe1d4bd7d19" config-ref="HTTP_Listener_config" path="/DATA"/>
+		<logger level="INFO" doc:name="Logger" doc:id="269ca04c-042d-470b-afb7-0744a4c37905" message="request received--------------#[attributes.queryParams]"/>
 		<db:select doc:id="0d6ca772-b713-4755-a970-a18d0f55cf77" config-ref="Database_Config">
 			<db:sql ><![CDATA[select * from account where accountId=:accID;	]]></db:sql>
 			<db:input-parameters ><![CDATA[#[accID:attributes.queryParams.accountId]]]></db:input-parameters>
